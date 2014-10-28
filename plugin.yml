@@ -1,9 +1,9 @@
 name: ExecuteCommands
 main: tk.wisdomunit.exe.ExecuteCommands
-version: 1.0
+version: 1.1
 description: A Plugin Request from Eric7765 By jezzye13(Jessey Cool)
 
 commands:
    exe:
-      description: Runs command by som one else
-      usage: /exe {PLAYER} {TICKS} /command
+      description: Runs command by some one else
+      usage: /exe {The player} {Cool down in ticks} {The command to run (with out the "/")}

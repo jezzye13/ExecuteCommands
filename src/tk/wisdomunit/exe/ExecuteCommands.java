@@ -1,6 +1,7 @@
 package tk.wisdomunit.exe;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -10,7 +11,7 @@ public class ExecuteCommands extends JavaPlugin {
 
 	private Player executer;
 	private String argsCommand;
-	private boolean worked;
+	private CommandSender sender;
 	private int ticks = 0;
 
 	@Override
@@ -21,14 +22,18 @@ public class ExecuteCommands extends JavaPlugin {
 				sender.sendMessage("/exe {PLAYER} {TICKS} {YOUR COMMAND}");
 				return true;
 			} else {
-				executer = Bukkit.getServer().getPlayer(args[0]);
-				if (executer == null) {
-					sender.sendMessage("Can`t find the player: " + args[0]);
+				try {
+					executer = Bukkit.getServer().getPlayer(args[0]);
+				} catch (NullPointerException e) {
 				}
 
 				try {
 					ticks = Integer.parseInt(args[1]);
+				} catch (NumberFormatException e) {
+					sender.sendMessage("Parameter {TICKS} has to be a number!");
+				}
 
+				try {
 					StringBuilder sb = new StringBuilder();
 					for (int i = 2; i < args.length; i++) {
 						if (i > 2)
@@ -38,20 +43,21 @@ public class ExecuteCommands extends JavaPlugin {
 
 					argsCommand = sb.toString();
 
-					if (callCommand()) {
-						sender.sendMessage("The command " + argsCommand
-								+ " was called by " + args[0] + " worked.");
+					this.sender = sender;
+					if (executer == null) {
+						sender.sendMessage("Can`t find the player: "
+								+ ChatColor.YELLOW + args[0]);
 					} else {
-						sender.sendMessage("The command " + argsCommand
-								+ " failed.");
+						callCommand();
 					}
 
 				} catch (Exception e) {
-					getLogger().warning("Oeps!");
+					getLogger()
+							.warning("Oeps! Don`t worry some one can fix it");
+					getLogger()
+							.warning(
+									"Please Mail me @ info@wisdomunit.tk and i will help you ;)");
 					e.printStackTrace();
-					for (int i = 0; i < args.length; i++) {
-						getLogger().info(args[i] + " | " + i);
-					}
 				}
 			}
 			return true;
@@ -60,10 +66,11 @@ public class ExecuteCommands extends JavaPlugin {
 		return false;
 	}
 
-	private boolean callCommand() throws Exception {
+	private void callCommand() throws Exception {
 		Bukkit.getScheduler().runTaskLater(this, new Runnable() {
 			@Override
 			public void run() {
+				boolean worked = false;
 
 				if (!executer.isOp()) {
 					executer.setOp(true);
@@ -73,9 +80,19 @@ public class ExecuteCommands extends JavaPlugin {
 					worked = Bukkit.dispatchCommand(executer, argsCommand);
 				}
 
+				if (worked) {
+					sender.sendMessage("The command " + ChatColor.YELLOW
+							+ argsCommand + ChatColor.WHITE + " was called by "
+							+ ChatColor.YELLOW + executer.getName()
+							+ ChatColor.WHITE + " and worked.");
+				} else {
+					sender.sendMessage("The command " + ChatColor.YELLOW
+							+ argsCommand + ChatColor.WHITE + " failed.");
+				}
+
 			}
 		}, ticks);
-		return worked;
+
 	}
 
 }
